@@ -6,6 +6,7 @@ from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from app.database import SessionLocal, engine
 from app import models, schemas
+from typing import List
 
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
@@ -61,6 +62,12 @@ async def create_task(
     db.refresh(task)
 
     return task
+
+@app.get("/tasks", response_model=List[schemas.TaskResponse])
+async def list_tasks(db: Session = Depends(get_db)):
+    """List all tasks (Unix 'ls' inspired)"""
+    tasks = db.query(models.Task).all()
+    return tasks
 
 @app.get("/tasks/{task_id}", response_model=schemas.TaskResponse)
 def get_task(task_id: str, db: Session = Depends(get_db)):
